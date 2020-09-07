@@ -52,6 +52,15 @@ public class DeveloperControllerTest {
         }
 
         @Test
+        @DisplayName("should return not found")
+        public void testGet() throws Exception {
+            mvc.perform(
+                    get("/developers/1")
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isNotFound());
+        }
+
+        @Test
         @DisplayName("should return created")
         public void testCreate() throws Exception {
             mvc.perform(
@@ -81,7 +90,7 @@ public class DeveloperControllerTest {
 
         @Test
         @DisplayName("should return error in deletion")
-        public void testDeleteNotExistingDeveloperReturns404() throws Exception {
+        public void testDeleteNotExisting() throws Exception {
             mvc.perform(
                     delete("/developers/1")
                             .contentType(MediaType.APPLICATION_JSON))

@@ -22,11 +22,7 @@ public class DeveloperService {
         return List.ofAll(this.repository.findAll());
     }
 
-    public Try<Developer> findById(Long id) {
-        return Try .of(() -> repository.findById(id).orElseThrow(DeveloperNotFoundException::new));
-    }
-
-    public Optional<Developer> getById(Long id) {
+    public Optional<Developer> get(Long id) {
         return this.repository.findById(id);
     }
 
@@ -46,6 +42,10 @@ public class DeveloperService {
                     repository.delete(developer);
                     return developer;
                 });
+    }
+
+    public Try<Developer> findById(Long id) {
+        return Try .of(() -> repository.findById(id).orElseThrow(DeveloperNotFoundException::new));
     }
 
 }

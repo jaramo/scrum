@@ -32,7 +32,7 @@ public class DeveloperController {
     @RequestMapping(value = "/{developerId}", method = {RequestMethod.GET})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public DeveloperResponse get(@PathVariable @NotBlank Long developerId) {
-        return developerService.getById(developerId)
+        return developerService.get(developerId)
                 .map(DeveloperResponse::fromEntity)
                 .orElseThrow(DeveloperNotFoundException::new);
     }
@@ -48,7 +48,6 @@ public class DeveloperController {
     @RequestMapping(value = "/{developerId}", method = {RequestMethod.DELETE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable @NotEmpty Long developerId) {
-        developerService.delete(developerId)
-                        .get();
+        developerService.delete(developerId).get();
     }
 }
