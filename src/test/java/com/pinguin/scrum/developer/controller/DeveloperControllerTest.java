@@ -42,7 +42,7 @@ public class DeveloperControllerTest {
     class WhenNoDevelopers {
         @Test
         @DisplayName("should return empty list")
-        public void getAll() throws Exception {
+        public void testGetAll() throws Exception {
             mvc.perform(
                     get("/developers")
                             .accept(MediaType.APPLICATION_JSON))
@@ -111,7 +111,7 @@ public class DeveloperControllerTest {
 
         @Test
         @DisplayName("should return list with one element")
-        public void getAll() throws Exception {
+        public void testGetAll() throws Exception {
             mvc.perform(
                     get("/developers")
                             .accept(MediaType.APPLICATION_JSON))
