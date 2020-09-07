@@ -38,4 +38,9 @@ test {
 
 jacocoTestReport {
 	dependsOn test
+	reports {
+		xml.enabled false
+		csv.enabled false
+		html.destination file("${rootDir}/coverage")
+	}
 }

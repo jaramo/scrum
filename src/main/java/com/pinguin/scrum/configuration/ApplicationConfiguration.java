@@ -34,4 +34,10 @@ public class ApplicationConfiguration {
       return new IssueService(bugRepository, storyRepository, developerService);
    }
 
+   @Bean
+   @Autowired
+   public SprintService sprintService(DeveloperService developerService, IssueService issueService, SprintProperties properties) {
+      return new SprintService(developerService, issueService, properties.getDeveloperCapacityPerWeek());
+   }
+
 }

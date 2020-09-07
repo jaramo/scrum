@@ -48,7 +48,9 @@ public class SprintServiceTest {
         when(developerService.getAllDevelopers()).thenReturn(List.of(developer));
 
         SprintService sprintService = new SprintService(developerService, issueService, developerCapacityPerWeek);
-        Map<Developer, List<WeeklyPlaning>> plan = sprintService.plan();
+        Map<Developer, List<WeeklyPlaning>> plan = sprintService.plan()
+                                                                .groupBy(w -> w.developer)
+                                                                .toMap(x -> x._1, t -> t._2);
 
         List<WeeklyPlaning> result = plan.getOrElse(developer, List.empty()).sortBy(x -> x.weekNumber);
 
@@ -78,7 +80,9 @@ public class SprintServiceTest {
         when(developerService.getAllDevelopers()).thenReturn(List.of(dev1, dev2));
 
         SprintService sprintService = new SprintService(developerService, issueService, developerCapacityPerWeek);
-        Map<Developer, List<WeeklyPlaning>> plan = sprintService.plan();
+        Map<Developer, List<WeeklyPlaning>> plan = sprintService.plan()
+                                                                .groupBy(w -> w.developer)
+                                                                .toMap(x -> x._1, t -> t._2);
 
         List<WeeklyPlaning> planningDev1 = plan.getOrElse(dev1, List.empty()).sortBy(x -> x.weekNumber);
         assertAll(
