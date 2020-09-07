@@ -24,4 +24,14 @@ public class ApplicationConfiguration {
       return new DeveloperService(repository);
    }
 
+   @Bean
+   @Autowired
+   public IssueService issueService(
+        BugRepository bugRepository,
+        StoryRepository storyRepository,
+        DeveloperService developerService
+   ) {
+      return new IssueService(bugRepository, storyRepository, developerService);
+   }
+
 }
