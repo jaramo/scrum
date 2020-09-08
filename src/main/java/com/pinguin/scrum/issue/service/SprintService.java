@@ -96,7 +96,7 @@ public class SprintService {
                         (x, xs) -> this.addStoriesToWeeklyPlanning(xs, p.copy(p.capacity - x.getEstimation(), p.assignments.append(x)))),
 
                 Case($Cons($(), $()),
-                        (x, xs) -> this.addStoriesToWeeklyPlanning(xs, p).apply((u, r) -> Tuple.of(u.prepend(x), r))),
+                        (x, xs) -> this.addStoriesToWeeklyPlanning(xs, p).map((u, r) -> Tuple.of(u.prepend(x), r))),
 
                 Case($Nil(), () -> Tuple.of(stories, p))
         );
