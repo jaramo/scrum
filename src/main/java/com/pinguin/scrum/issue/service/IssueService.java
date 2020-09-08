@@ -1,5 +1,6 @@
 package com.pinguin.scrum.issue.service;
 
+import com.pinguin.scrum.developer.repository.entity.Developer;
 import com.pinguin.scrum.developer.service.DeveloperService;
 import com.pinguin.scrum.issue.exception.DuplicatedIssueTitleException;
 import com.pinguin.scrum.issue.exception.IssueNotFoundException;
@@ -19,12 +20,10 @@ public class IssueService {
 
     private final BugRepository bugRepository;
     private final StoryRepository storyRepository;
-    private final DeveloperService developerService;
 
-    public IssueService(BugRepository bugRepository, StoryRepository storyRepository, DeveloperService developerService) {
+    public IssueService(BugRepository bugRepository, StoryRepository storyRepository) {
         this.bugRepository = bugRepository;
         this.storyRepository = storyRepository;
-        this.developerService = developerService;
     }
 
     public Try<Story> createStory(String title, String description, Long estimation) {
@@ -57,6 +56,22 @@ public class IssueService {
 
     public Try<Bug> deleteBug(Long bugId) {
         return delete(bugId, bugRepository::findById, bugRepository::delete);
+    }
+
+    public Try<Story> assign(Story story, Developer developer) {
+        return assign(story, developer, storyRepository::save);
+    }
+
+    public Try<Bug> assign(Bug bug, Developer developer) {
+        return assign(bug, developer, bugRepository::save);
+    }
+
+    private <T extends Issue> Try<T> assign(T issue, Developer developer, Function1<T, T> save) {
+        return Try.of(() -> {
+            issue.setAssignedDeveloper(developer);
+
+            return save.apply(issue);
+        });
     }
 
     private <T extends Issue> Try<T> create(T issue, Function1<String, Boolean> exists, Function1<T, T> save) {

@@ -19,8 +19,16 @@ public class SprintController {
     @Autowired
     private SprintService sprintService;
 
-    @RequestMapping(value = "/plan", method = {RequestMethod.POST})
+    @RequestMapping(value = "", method = {RequestMethod.GET})
     @ResponseStatus(HttpStatus.OK)
+    public List<WeeklyPlanningResponse> get() {
+        return sprintService.get()
+                .transform(WeeklyPlanningResponse::fromWeeklyPlanning)
+                .toJavaList();
+    }
+
+    @RequestMapping(value = "/plan", method = {RequestMethod.POST})
+    @ResponseStatus(HttpStatus.CREATED)
     public List<WeeklyPlanningResponse> plan() {
         return sprintService.plan()
                             .transform(WeeklyPlanningResponse::fromWeeklyPlanning)

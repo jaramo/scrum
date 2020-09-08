@@ -3,6 +3,7 @@ package com.pinguin.scrum.configuration;
 import com.pinguin.scrum.developer.repository.DeveloperRepository;
 import com.pinguin.scrum.developer.service.DeveloperService;
 import com.pinguin.scrum.issue.repository.BugRepository;
+import com.pinguin.scrum.issue.repository.SprintRepository;
 import com.pinguin.scrum.issue.repository.StoryRepository;
 import com.pinguin.scrum.issue.service.IssueService;
 import com.pinguin.scrum.issue.service.SprintService;
@@ -26,18 +27,23 @@ public class ApplicationConfiguration {
 
    @Bean
    @Autowired
-   public IssueService issueService(
-        BugRepository bugRepository,
-        StoryRepository storyRepository,
-        DeveloperService developerService
-   ) {
-      return new IssueService(bugRepository, storyRepository, developerService);
+   public IssueService issueService(BugRepository bugRepository, StoryRepository storyRepository) {
+      return new IssueService(bugRepository, storyRepository);
    }
 
    @Bean
    @Autowired
-   public SprintService sprintService(DeveloperService developerService, IssueService issueService, SprintProperties properties) {
-      return new SprintService(developerService, issueService, properties.getDeveloperCapacityPerWeek());
+   public SprintService sprintService(
+        SprintRepository sprintRepository,
+        DeveloperService developerService,
+        IssueService issueService,
+        SprintProperties properties
+   ) {
+      return new SprintService(
+                     sprintRepository,
+                     developerService,
+                     issueService,
+                     properties.getDeveloperCapacityPerWeek());
    }
 
 }

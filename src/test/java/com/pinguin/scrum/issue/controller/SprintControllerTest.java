@@ -2,6 +2,7 @@ package com.pinguin.scrum.issue.controller;
 
 import com.pinguin.scrum.developer.repository.entity.Developer;
 import com.pinguin.scrum.developer.service.DeveloperService;
+import com.pinguin.scrum.issue.repository.SprintRepository;
 import com.pinguin.scrum.issue.service.IssueService;
 import io.vavr.collection.List;
 import io.vavr.collection.Stream;
@@ -11,15 +12,18 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(
-    value={"spring.profiles.active=test"},
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+        value = {"spring.profiles.active=test"},
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
 @DisplayName("Sprint operations")
@@ -34,13 +38,16 @@ public class SprintControllerTest {
     @Autowired
     private IssueService issueService;
 
+    @Autowired
+    private SprintRepository sprintRepository;
+
     private void createStories() {
         Stream.from(1L)
-              .take(10)
-              .forEach(l ->
-                  issueService.createStory(
-                      String.format("Story %d", l), String.format("Story %d description", l), l)
-              );
+                .take(10)
+                .forEach(l ->
+                        issueService.createStory(
+                                String.format("Story %d", l), String.format("Story %d description", l), l)
+                );
     }
 
     @Nested
@@ -56,8 +63,9 @@ public class SprintControllerTest {
 
         @AfterEach
         void tearDown() {
-            developerService.delete(dev.getId()).get();
+            sprintRepository.deleteAll();
             issueService.getAllStories().forEach(s -> issueService.deleteStory(s.getId()));
+            developerService.delete(dev.getId()).get();
         }
 
         @Test
@@ -65,6 +73,12 @@ public class SprintControllerTest {
         public void testNoStories() throws Exception {
             mvc.perform(
                     post("/sprint/plan")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$").isEmpty());
+
+            mvc.perform(
+                    get("/sprint")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$").isEmpty());
@@ -74,12 +88,25 @@ public class SprintControllerTest {
         @DisplayName("should return six week planning")
         public void testTenStories() throws Exception {
             createStories();
-            mvc.perform(
-                    post("/sprint/plan")
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$").isArray())
-                    .andExpect(jsonPath("$").value(hasSize(6)));
+            MvcResult postResult =
+                    mvc.perform(
+                            post("/sprint/plan")
+                                    .contentType(MediaType.APPLICATION_JSON))
+                            .andExpect(status().isCreated())
+                            .andExpect(jsonPath("$").isArray())
+                            .andExpect(jsonPath("$").value(hasSize(6)))
+                            .andReturn();
+
+            MvcResult getResult =
+                    mvc.perform(
+                            get("/sprint")
+                                    .contentType(MediaType.APPLICATION_JSON))
+                            .andExpect(status().isOk())
+                            .andExpect(jsonPath("$").isArray())
+                            .andExpect(jsonPath("$").value(hasSize(6)))
+                            .andReturn();
+
+            assertEquals(postResult.getResponse().getContentAsString(), getResult.getResponse().getContentAsString());
         }
 
     }
@@ -93,15 +120,16 @@ public class SprintControllerTest {
         @BeforeEach
         void setUp() {
             devs = List.of(
-                developerService.create("developer 1").get(),
-                developerService.create("developer 2").get()
+                    developerService.create("developer 1").get(),
+                    developerService.create("developer 2").get()
             );
         }
 
         @AfterEach
         void tearDown() {
-            devs.forEach(d -> developerService.delete(d.getId()).get());
+            sprintRepository.deleteAll();
             issueService.getAllStories().forEach(s -> issueService.deleteStory(s.getId()));
+            devs.forEach(d -> developerService.delete(d.getId()).get());
         }
 
         @Test
@@ -109,6 +137,12 @@ public class SprintControllerTest {
         public void testNoStories() throws Exception {
             mvc.perform(
                     post("/sprint/plan")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$").isEmpty());
+
+            mvc.perform(
+                    get("/sprint")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$").isEmpty());
@@ -118,12 +152,25 @@ public class SprintControllerTest {
         @DisplayName("should return tree week planning")
         public void testTenStories() throws Exception {
             createStories();
-            mvc.perform(
-                    post("/sprint/plan")
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$").isArray())
-                    .andExpect(jsonPath("$").value(hasSize(3)));
+            MvcResult postResult =
+                    mvc.perform(
+                            post("/sprint/plan")
+                                    .contentType(MediaType.APPLICATION_JSON))
+                            .andExpect(status().isCreated())
+                            .andExpect(jsonPath("$").isArray())
+                            .andExpect(jsonPath("$").value(hasSize(3)))
+                            .andReturn();
+
+            MvcResult getResult =
+                    mvc.perform(
+                            get("/sprint")
+                                    .contentType(MediaType.APPLICATION_JSON))
+                            .andExpect(status().isOk())
+                            .andExpect(jsonPath("$").isArray())
+                            .andExpect(jsonPath("$").value(hasSize(3)))
+                            .andReturn();
+
+            assertEquals(postResult.getResponse().getContentAsString(), getResult.getResponse().getContentAsString());
         }
 
     }

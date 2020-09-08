@@ -3,9 +3,12 @@ package com.pinguin.scrum.issue.service;
 import com.pinguin.scrum.developer.repository.entity.Developer;
 import com.pinguin.scrum.developer.service.DeveloperService;
 import com.pinguin.scrum.issue.model.WeeklyPlaning;
+import com.pinguin.scrum.issue.repository.SprintRepository;
+import com.pinguin.scrum.issue.repository.entity.Sprint;
 import com.pinguin.scrum.issue.repository.entity.Story;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
+import org.assertj.core.util.IterableUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,8 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Plan weekly stories assignation to developers")
@@ -42,20 +44,28 @@ public class SprintServiceTest {
 
     @Test
     @DisplayName("6 stories with 21 points for one developer should be scheduled in 3 weeks")
-    void testPlanSprintOnDeveloper(@Mock DeveloperService developerService) {
+    void testPlanSprintOneDeveloper(
+        @Mock DeveloperService developerService,
+        @Mock SprintRepository sprintRepository
+    ) {
 
         Developer developer = new Developer("dev1");
         when(developerService.getAllDevelopers()).thenReturn(List.of(developer));
+        when(sprintRepository.saveAll(anyIterable())).thenAnswer(a -> a.getArgument(0));
 
-        SprintService sprintService = new SprintService(developerService, issueService, developerCapacityPerWeek);
+        SprintService sprintService = new SprintService(sprintRepository, developerService, issueService, developerCapacityPerWeek);
         Map<Developer, List<WeeklyPlaning>> plan = sprintService.plan()
                                                                 .groupBy(w -> w.developer)
                                                                 .toMap(x -> x._1, t -> t._2);
 
+        verify(sprintRepository, times(1)).deleteAll();
+        verify(sprintRepository, times(1)).saveAll(argThat(i -> IterableUtil.sizeOf(i) == 6));
+        verify(issueService, times(6)).assign(any(Story.class), eq(developer));
+
         List<WeeklyPlaning> result = plan.getOrElse(developer, List.empty()).sortBy(x -> x.weekNumber);
 
         assertAll(
-                () -> assertEquals(3, result.length(), "total"),
+                () -> assertEquals(3, result.length(), "total weeks"),
 
                 () -> assertEquals(1, result.head().weekNumber, "week number 1"),
                 () -> assertEquals(0, result.head().capacity, "capacity 0"),
@@ -73,20 +83,30 @@ public class SprintServiceTest {
     
     @Test
     @DisplayName("6 stories with 21 points for 2 developers should be scheduled in 2 weeks")
-    void testPlanSprintTwoDevelopers(@Mock DeveloperService developerService) {
+    void testPlanSprintTwoDevelopers(
+        @Mock DeveloperService developerService,
+        @Mock SprintRepository sprintRepository
+    ) {
 
         Developer dev1 = new Developer("dev1");
         Developer dev2 = new Developer("dev2");
         when(developerService.getAllDevelopers()).thenReturn(List.of(dev1, dev2));
+        when(sprintRepository.saveAll(anyIterable())).thenAnswer(a -> a.getArgument(0));
 
-        SprintService sprintService = new SprintService(developerService, issueService, developerCapacityPerWeek);
+        SprintService sprintService = new SprintService(sprintRepository, developerService, issueService, developerCapacityPerWeek);
         Map<Developer, List<WeeklyPlaning>> plan = sprintService.plan()
                                                                 .groupBy(w -> w.developer)
                                                                 .toMap(x -> x._1, t -> t._2);
 
+        verify(sprintRepository, times(1)).deleteAll();
+        verify(sprintRepository, times(1)).saveAll(argThat(i -> IterableUtil.sizeOf(i) == 6));
+        verify(issueService, times(3)).assign(any(Story.class), eq(dev1));
+        verify(issueService, times(3)).assign(any(Story.class), eq(dev2));
+
+
         List<WeeklyPlaning> planningDev1 = plan.getOrElse(dev1, List.empty()).sortBy(x -> x.weekNumber);
         assertAll(
-                () -> assertEquals(2, planningDev1.length(), "total"),
+                () -> assertEquals(2, planningDev1.length(), "total weeks"),
 
                 () -> assertEquals(1, planningDev1.head().weekNumber, "week number 1"),
                 () -> assertEquals(0, planningDev1.head().capacity, "capacity 0"),
@@ -103,7 +123,7 @@ public class SprintServiceTest {
 
                 () -> assertEquals(1, planningDev2.head().weekNumber, "week number 1"),
                 () -> assertEquals(0, planningDev2.head().capacity, "capacity 0"),
-                () -> assertEquals(3, planningDev2.head().assignments.length(), "number of stories 2")
+                () -> assertEquals(3, planningDev2.head().assignments.length(), "number of stories 3")
         );
     }
 }
