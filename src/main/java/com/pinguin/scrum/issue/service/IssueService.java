@@ -67,11 +67,7 @@ public class IssueService {
     }
 
     private <T extends Issue> Try<T> assign(T issue, Developer developer, Function1<T, T> save) {
-        return Try.of(() -> {
-            issue.setAssignedDeveloper(developer);
-
-            return save.apply(issue);
-        });
+        return Try.of(() -> save.apply(issue.copy(developer)));
     }
 
     private <T extends Issue> Try<T> create(T issue, Function1<String, Boolean> exists, Function1<T, T> save) {

@@ -1,6 +1,9 @@
 package com.pinguin.scrum.issue.repository.entity;
 
+import com.pinguin.scrum.developer.repository.entity.Developer;
+
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "stories")
@@ -19,7 +22,24 @@ public class Story extends Issue {
     @Column(name = "status", nullable = false)
     private Status status;
 
-    public Story() {}
+    public Story() {
+        super();
+    }
+
+    private Story(
+            Long id,
+            String title,
+            String description,
+            Developer assignedDeveloper,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt,
+            Long estimation,
+            Status status
+    ) {
+        super(id, title, description, assignedDeveloper, createdAt, updatedAt);
+        this.estimation = estimation;
+        this.status = status;
+    }
 
     public Story(String title, String description, Long estimation) {
         super(title, description);
@@ -31,15 +51,20 @@ public class Story extends Issue {
         return estimation;
     }
 
-    public void setEstimation(Long estimation) {
-        this.estimation = estimation;
-    }
-
     public Status getStatus() {
         return status;
     }
 
-    public void setStatus(Status status) {
-        this.status = status;
+    @Override
+    public Story copy(Developer developer) {
+        return new Story(
+                this.id,
+                this.title,
+                this.description,
+                developer,
+                this.createdAt,
+                this.updatedAt,
+                this.estimation,
+                this.status);
     }
 }

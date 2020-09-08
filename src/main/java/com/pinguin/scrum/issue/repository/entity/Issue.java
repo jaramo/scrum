@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-abstract public class Issue {
+public abstract class Issue {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,8 +43,36 @@ abstract public class Issue {
         this.assignedDeveloper = null;
     }
 
+    protected Issue(
+        Long id,
+        String title,
+        String description,
+        Developer assignedDeveloper,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
+    ) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.assignedDeveloper = assignedDeveloper;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
     public Long getId() {
         return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public Developer getAssignedDeveloper() {
+        return assignedDeveloper;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -55,27 +83,5 @@ abstract public class Issue {
         return updatedAt;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Developer getAssignedDeveloper() {
-        return assignedDeveloper;
-    }
-
-    public void setAssignedDeveloper(Developer assignedDeveloper) {
-        this.assignedDeveloper = assignedDeveloper;
-    }
+    public abstract <T extends Issue> T copy(Developer developer);
 }
