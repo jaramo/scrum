@@ -79,10 +79,8 @@ public class SprintService {
                     return acc;
                 } else {
                     return this.getWeeklyPlanningForDeveloper(week, developer, acc._1).map(x -> x, acc._2::append);
-                }
-            }
-        )
-        .apply((xs, ps) -> this.plan(week + 1, xs, ps, devs));
+                }}).apply(
+            (remainingStories, acc) -> this.plan(week + 1, remainingStories, acc, devs));
     }
 
     private Tuple2<List<Story>, WeeklyPlaning> getWeeklyPlanningForDeveloper(Integer week, Developer developer, List<Story> unplannedStories) {
@@ -90,15 +88,17 @@ public class SprintService {
                 unplannedStories, new WeeklyPlaning(week, developer, this.capacity, List.empty()));
     }
 
-    private Tuple2<List<Story>, WeeklyPlaning> addStoriesToWeeklyPlanning(List<Story> stories, WeeklyPlaning p) {
+    private Tuple2<List<Story>, WeeklyPlaning> addStoriesToWeeklyPlanning(List<Story> stories, WeeklyPlaning planing) {
         return Match(stories).of(
-                Case($Cons($(s -> s.getEstimation() <= p.capacity), $()),
-                        (x, xs) -> this.addStoriesToWeeklyPlanning(xs, p.copy(p.capacity - x.getEstimation(), p.assignments.append(x)))),
+                Case($Cons($(story -> story.getEstimation() <= planing.capacity), $()),
+                        (x, xs) -> this.addStoriesToWeeklyPlanning(xs,
+                                        planing.copy(planing.capacity - x.getEstimation(), planing.assignments.append(x)))),
 
                 Case($Cons($(), $()),
-                        (x, xs) -> this.addStoriesToWeeklyPlanning(xs, p).map((u, r) -> Tuple.of(u.prepend(x), r))),
+                        (x, xs) -> this.addStoriesToWeeklyPlanning(xs, planing)
+                                            .map((remaining, acc) -> Tuple.of(remaining.prepend(x), acc))),
 
-                Case($Nil(), () -> Tuple.of(stories, p))
+                Case($Nil(), () -> Tuple.of(stories, planing))
         );
     }
 

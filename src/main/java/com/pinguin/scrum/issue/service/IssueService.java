@@ -1,7 +1,6 @@
 package com.pinguin.scrum.issue.service;
 
 import com.pinguin.scrum.developer.repository.entity.Developer;
-import com.pinguin.scrum.developer.service.DeveloperService;
 import com.pinguin.scrum.issue.exception.DuplicatedIssueTitleException;
 import com.pinguin.scrum.issue.exception.IssueNotFoundException;
 import com.pinguin.scrum.issue.repository.BugRepository;
