@@ -22,7 +22,7 @@ I've chosen to follow the functional programming approach, meaning that the data
 For that purpose, I've used a third party library, [vavr](https://www.vavr.io/), that implements Java collections in a
     functional way. It also enables you to do pattern matching and other functional programming operations like `flatMap`, `reduce` or `fold`.
 
-Given the verbose nature of Java, functional implementation of [vavr](https://www.vavr.io/), can be a bit difficult to read.
+Given the verbose nature of Java, the functional implementation of [vavr](https://www.vavr.io/) can be a bit difficult to read.
     Nevertheless, it allows a more concise implementation, thanks to the use of lambdas and tuples instead of java collectors,
     once you get used to it.
 
@@ -46,8 +46,8 @@ Match(unassignedStories).of(
 )
 ```
 
-Even with the overhead of the java verbosity, the use **pattern matching** with **guards**, makes the implementation much more
-    strait forward and easy to follow than the typical `if (cond) { ... } else { ... }`.
+Even with the overhead of the java verbosity, the use of **pattern matching** with **guards** makes the implementation much more
+    straightforward and easy to follow than the typical `if (cond) { ... } else { ... }`.
 
 ### Business Logic
 The story assignation algorithm assumes that no story could be estimated to be greater than the total story points 
